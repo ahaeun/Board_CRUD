@@ -22,10 +22,9 @@ public class Seed128 {
     }
 
     public String encrypt(String str){
-        str = str.replaceAll("/", "_");
         byte[] strBytes = str.getBytes(ENCODING_TYPE);
         byte[] enc = KisaSeedCbc.SEED_CBC_Encrypt(this.key, IV, strBytes ,0, strBytes.length);
-        return new String(Base64.getEncoder().encode(enc), ENCODING_TYPE);
+        return new String(Base64.getEncoder().encode(enc), ENCODING_TYPE).replaceAll("/", "_");
     }
 
     public String decrypt(String str){
