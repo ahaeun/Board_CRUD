@@ -4,7 +4,6 @@ package com.dao.popup.service;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.ui.Model;
 
 import com.dao.popup.dto.PopupConnectTypeDto;
