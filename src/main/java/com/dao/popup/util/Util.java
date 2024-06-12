@@ -25,5 +25,5 @@ public class Util {
     }
 
     // 이미지 파일 확장자 목록
-    public static final List<String> IMAGE_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "gif", "bmp");
+    public static final List<String> IMAGE_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
 }
