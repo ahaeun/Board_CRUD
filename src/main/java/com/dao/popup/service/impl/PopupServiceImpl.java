@@ -1,16 +1,17 @@
 package com.dao.popup.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.ibatis.binding.BindingException;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -28,11 +29,14 @@ import com.dao.popup.dto.response.PopupTypeListResponseDto;
 import com.dao.popup.dto.response.PopupTypeResponseDto;
 
 import com.dao.popup.enums.BasicResponseData;
+
 import com.dao.popup.mapper.FileMapper;
 import com.dao.popup.mapper.PopupMapper;
+
 import com.dao.popup.service.FileService;
 import com.dao.popup.service.PopupService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @Service
@@ -48,11 +52,20 @@ public class PopupServiceImpl implements PopupService{
     FileMapper fileMapper;
 
 	@Override
-	public Map<String, Object> selectPopupList(PopupDto popupDto, Pageable pageable) {
+	public Map<String, Object> selectPopupList(String page, PopupDto popupDto) {
+
+        // page 예외 처리(음수, 문자열)
+        int pageNumber;
+        try{
+            pageNumber = Integer.parseInt(page);
+            pageNumber = Math.max(pageNumber - 1, 0); // 0 이하면 0으로 초기화
+        }catch(NumberFormatException e){ // 페이지가 문자열로 넘어왔을 경우
+            pageNumber = 0;
+        }
+        Pageable pageable =PageRequest.of(pageNumber, 5);
 		
         int total = popupMapper.popupListCount(popupDto);
         Map<String, Object> popupMap = new HashMap<>();
-
         RequestListDto<?> requestList = RequestListDto.builder()
             .data(popupDto)
             .pageable(pageable)
@@ -66,7 +79,7 @@ public class PopupServiceImpl implements PopupService{
                             .page(popupPageList.getNumber())
                             .listCount(total)
                             .build();
-        popupMap.put("pageDto", pageDto); // 페이지 데이터
+        popupMap.put("pageDto", pageDto); // 페이지 관련 데이터
         popupMap.put("popupPageList", popupPageList); // 페이징한 데이터 리스트
   
         return popupMap;
@@ -74,21 +87,22 @@ public class PopupServiceImpl implements PopupService{
 	}
 
     @Override
-    public PopupResponseDto selectPopup(int popupID, PopupResponseDto resultDto) {
-        PopupDto selectPopup = new PopupDto();
-        
+    public PopupResponseDto selectPopup(String popupStringID) {
         try{
-            selectPopup = popupMapper.selectPopup(popupID);
+            int popupID = Integer.parseInt(popupStringID);
+
+            PopupDto selectPopup = popupMapper.selectPopup(popupID);
             if(selectPopup == null || selectPopup.getPopupID() == -1){ // 존재하지 않는 팝업일 경우
-                resultDto = PopupResponseDto.createErrorResponse(selectPopup, BasicResponseData.FAIL.getMessage());
+                PopupResponseDto resultDto = PopupResponseDto.createErrorResponse(selectPopup, BasicResponseData.FAIL.getMessage());
+                return resultDto;
             }else {
-                resultDto = PopupResponseDto.createSuccessResponse(selectPopup, BasicResponseData.SUCCESS.getMessage());
+                PopupResponseDto resultDto = PopupResponseDto.createSuccessResponse(selectPopup, BasicResponseData.SUCCESS.getMessage());
+                return resultDto;
             }
-        }catch(BindingException e){ // select 실패
-            resultDto = PopupResponseDto.createErrorResponse(selectPopup, BasicResponseData.FAIL.getMessage());
+        }catch(Exception e) {
+            PopupResponseDto resultDto = PopupResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
+            return resultDto;
         }
-        
-        return resultDto;
     }
 
     @Override
@@ -128,17 +142,32 @@ public class PopupServiceImpl implements PopupService{
     }
 
     @Override
-    public PopupListResponseDto deletePopupList(List<Integer> paramList, PopupListResponseDto resultDto) {
+    public PopupListResponseDto deletePopupList(HttpServletRequest request) {
 
-        int result = popupMapper.deletePopup(paramList);
+        PopupListResponseDto resultDto = PopupListResponseDto.builder().build();
+        String[] paramArr = request.getParameterValues("popupID");
 
-        if(result > 0) { //성공
-            resultDto = PopupListResponseDto.createSuccessResponse(paramList, BasicResponseData.SUCCESS.getMessage());
+        if(!paramArr[0].isEmpty()){
+            List<String> paramList = Arrays.asList(paramArr);
+            List<Integer> intParamList = new ArrayList<>();
 
-        }else {
-            resultDto = PopupListResponseDto.createErrorResponse(paramList, BasicResponseData.FAIL.getMessage());
+            //requestID를 int형으로 변환
+            try {
+                intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+                int result = popupMapper.deletePopup(intParamList);
+
+                if(result > 0) { //성공
+                    resultDto = PopupListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage());
+                }else {
+                    resultDto = PopupListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getMessage());
+                }
+            }catch(Exception e) { // 문자열로 들어왔을 경우
+                resultDto = PopupListResponseDto.createErrorResponse(intParamList, "잘못된 작업이 요청되었습니다.");
+            }
+            
+        }else{
+            resultDto = PopupListResponseDto.createErrorResponse(null, "삭제할 팝업을 선택해주세요.");
         }
-
         return resultDto;
     }
 
@@ -259,10 +288,4 @@ public class PopupServiceImpl implements PopupService{
         }
         return resultDto;
     }
-
-    // @Override
-    // public List<PopupDto> injectionTest(String injection) {
-    //     return popupMapper.injectionTest(injection);
-    // }
-    
 }

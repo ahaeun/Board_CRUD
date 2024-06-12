@@ -18,20 +18,21 @@ import com.dao.popup.dto.response.PopupResponseDto;
 import com.dao.popup.dto.response.PopupTypeListResponseDto;
 import com.dao.popup.dto.response.PopupTypeResponseDto;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 public interface PopupService {
 
     //팝업 게시판 CRUD
-    Map<String, Object> selectPopupList(PopupDto popupDto, Pageable pageable);
+    Map<String, Object> selectPopupList(String page, PopupDto popupDto);
 
     PopupResponseDto insertPopup(PopupDto popupDto, PopupResponseDto resultDto, FileListResponseDto fileListResponseDto) throws Exception;
 
     PopupResponseDto updatePopup(PopupDto popupDto, PopupResponseDto resultDto, FileListResponseDto fileListResponseDto);
 
-    PopupListResponseDto deletePopupList(List<Integer> paramList, PopupListResponseDto resultDto);
+    PopupListResponseDto deletePopupList(HttpServletRequest request);
 
-    PopupResponseDto selectPopup(int popupID, PopupResponseDto resultDto);
+    PopupResponseDto selectPopup(String popupStringID);
 
     List<PopupTypeDto> selectPopupType();
 
@@ -57,7 +58,4 @@ public interface PopupService {
     PopupConnectTypeResponseDto updatePopupConnectType(@Valid PopupConnectTypeDto popupConnectTypeDto, PopupConnectTypeResponseDto resultDto);
 
     PopupConnectTypeListResponseDto deletePopupConnectTypeList(List<Integer> intParamList, PopupConnectTypeListResponseDto resultDto);
-
-    // List<PopupDto> injectionTest(String injection);
-
 }

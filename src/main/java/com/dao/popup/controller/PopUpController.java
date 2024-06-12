@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -56,23 +54,7 @@ public class PopUpController {
     @GetMapping("/popupList/{page}")
     public String postMethodName(@PathVariable("page") String page, PopupDto PopupDto, Model model) {
 
-        int pageNumber = 0;
-        Pageable pageable = null;
-
-        try{
-            pageNumber = Integer.parseInt(page);
-        }catch(NumberFormatException e){ // 페이지가 문자열로 넘어왔을 경우
-            pageNumber = 0;
-        }
-
-        // 페이지 0이거나 음수일 경우 예외처리
-        if(pageNumber > 0) {
-            pageable = PageRequest.of(pageNumber - 1, 5);
-        }else {
-            pageable = PageRequest.of(0, 5);
-        }
-
-        Map<String, Object> popupMap = popupService.selectPopupList(PopupDto, pageable);
+        Map<String, Object> popupMap = popupService.selectPopupList(page, PopupDto);
 
         model.addAttribute("popupPageList", popupMap.get("popupPageList"));
         model.addAttribute("pageDto", popupMap.get("pageDto"));
@@ -86,17 +68,7 @@ public class PopUpController {
      */
     @GetMapping("/select/{popupID}")
     public String popupSelect(Model model, @PathVariable("popupID") String popupStringID) {
-
-        int popupID = 0;
-        PopupResponseDto resultDto = PopupResponseDto.builder().build();
-
-        try{
-            popupID = Integer.parseInt(popupStringID);
-        }catch(Exception e) {
-            resultDto = PopupResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
-        }
-
-        resultDto = popupService.selectPopup(popupID, resultDto);
+        PopupResponseDto resultDto = popupService.selectPopup(popupStringID);
         model.addAttribute("result", resultDto);
 
         return "popup/popupSelect.admin";
@@ -151,17 +123,7 @@ public class PopUpController {
      */
     @GetMapping("/form/{popupID}")
     public String popupForm(PopupDto popupDto, Model model, @PathVariable("popupID") String popupStringID) {
-
-        int popupID = 0;
-        PopupResponseDto resultDto = PopupResponseDto.builder().build();
-
-        try{
-            popupID = Integer.parseInt(popupStringID);
-        }catch(Exception e) {
-            resultDto = PopupResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
-        }
-
-        resultDto = popupService.selectPopup(popupID, resultDto);
+        PopupResponseDto resultDto = popupService.selectPopup(popupStringID);
         popupService.selectPopupForm(resultDto.getData(), model); // 조회 예외처리 및 result 값 세팅
 
         return "popup/popupForm.admin";
@@ -189,7 +151,7 @@ public class PopUpController {
             //requestID를 int형으로 변환
             try {
                 intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-                resultDto = popupService.deletePopupList(intParamList, resultDto);
+                resultDto = popupService.deletePopupList(request);
             }catch(Exception e) { // 문자열로 들어왔을 경우
                 resultDto = PopupListResponseDto.createErrorResponse(intParamList, "잘못된 작업이 요청되었습니다.");
             }
@@ -367,20 +329,6 @@ public class PopUpController {
 
         return resultDto;
     }
-
-    // @GetMapping("/injectoinTestForm")
-    // public String injectoinTestForm() throws Exception {
-    //     return "popup/injectionTestForm";
-        
-    // }
-
-    // @PostMapping("/injection.do")
-    // public String postMethodName(Model model, @RequestParam("test") String test) {
-        
-    //     List<PopupDto> dto = popupService.injectionTest(test);
-    //     model.addAttribute("test", dto);
-    //     return "popup/injection.do.admin";
-    // }
 
     @GetMapping("/imageForm")
     public String imageForm() {
