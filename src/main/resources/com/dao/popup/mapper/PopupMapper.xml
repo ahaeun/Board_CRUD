@@ -130,8 +130,8 @@
         select PopUpTitle from popup where PopUpID = #{injection};
     </select> -->
 
-    <select id="injectionTest" parameterType="String" resultType="com.dao.popup.dto.PopupDto">
+    <!-- <select id="injectionTest" parameterType="String" resultType="com.dao.popup.dto.PopupDto">
         select PopUpTitle from popup where popupTitle = #{injection};
-    </select>
+    </select> -->
 
 </mapper>

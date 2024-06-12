@@ -260,9 +260,9 @@ public class PopupServiceImpl implements PopupService{
         return resultDto;
     }
 
-    @Override
-    public List<PopupDto> injectionTest(String injection) {
-        return popupMapper.injectionTest(injection);
-    }
+    // @Override
+    // public List<PopupDto> injectionTest(String injection) {
+    //     return popupMapper.injectionTest(injection);
+    // }
     
 }

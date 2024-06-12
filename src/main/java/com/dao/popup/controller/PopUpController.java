@@ -368,19 +368,19 @@ public class PopUpController {
         return resultDto;
     }
 
-    @GetMapping("/injectoinTestForm")
-    public String injectoinTestForm() throws Exception {
-        return "popup/injectionTestForm";
+    // @GetMapping("/injectoinTestForm")
+    // public String injectoinTestForm() throws Exception {
+    //     return "popup/injectionTestForm";
         
-    }
+    // }
 
-    @PostMapping("/injection.do")
-    public String postMethodName(Model model, @RequestParam("test") String test) {
+    // @PostMapping("/injection.do")
+    // public String postMethodName(Model model, @RequestParam("test") String test) {
         
-        List<PopupDto> dto = popupService.injectionTest(test);
-        model.addAttribute("test", dto);
-        return "popup/injection.do.admin";
-    }
+    //     List<PopupDto> dto = popupService.injectionTest(test);
+    //     model.addAttribute("test", dto);
+    //     return "popup/injection.do.admin";
+    // }
 
     @GetMapping("/imageForm")
     public String imageForm() {

@@ -58,6 +58,6 @@ public interface PopupService {
 
     PopupConnectTypeListResponseDto deletePopupConnectTypeList(List<Integer> intParamList, PopupConnectTypeListResponseDto resultDto);
 
-    List<PopupDto> injectionTest(String injection);
+    // List<PopupDto> injectionTest(String injection);
 
 }
