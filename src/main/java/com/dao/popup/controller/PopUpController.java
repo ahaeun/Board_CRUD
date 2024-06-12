@@ -1,10 +1,7 @@
 package com.dao.popup.controller;
 
-import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -128,9 +125,6 @@ public class PopUpController {
 
         return "popup/popupForm.admin";
     }
-    
-
-
 
     /*
      *  @description : 팝업 삭제(다중 삭제 포함)
@@ -139,29 +133,8 @@ public class PopUpController {
     @ResponseBody
     @DeleteMapping("/delete")
     public PopupListResponseDto popupDelete(HttpServletRequest request) {
-
-        PopupListResponseDto resultDto = PopupListResponseDto.builder().build();
-
-        String[] paramArr = request.getParameterValues("popupID");
-
-        if(!paramArr[0].isEmpty()){
-            List<String> paramList = Arrays.asList(paramArr);
-            List<Integer> intParamList = new ArrayList<>();
-
-            //requestID를 int형으로 변환
-            try {
-                intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-                resultDto = popupService.deletePopupList(request);
-            }catch(Exception e) { // 문자열로 들어왔을 경우
-                resultDto = PopupListResponseDto.createErrorResponse(intParamList, "잘못된 작업이 요청되었습니다.");
-            }
-            
-        }else{
-            resultDto = PopupListResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
-        }
-
+        PopupListResponseDto resultDto = popupService.deletePopupList(request);
         return resultDto;
-
     }
 
     /*
@@ -218,25 +191,7 @@ public class PopUpController {
     @DeleteMapping("/popupType/delete")
     public PopupTypeListResponseDto popupTypeDelete(HttpServletRequest request) {
 
-        PopupTypeListResponseDto resultDto = PopupTypeListResponseDto.builder().build();
-
-        String[] paramArr = request.getParameterValues("popupTypeID");
-
-        if(!paramArr[0].isEmpty()){
-            List<String> paramList = Arrays.asList(paramArr);
-            List<Integer> intParamList = new ArrayList<>();
-
-            //requestID를 int형으로 변환
-            try {
-                intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-                resultDto = popupService.deletePopupTypeList(intParamList, resultDto);
-            }catch(Exception e) { // 문자열로 들어왔을 경우
-                resultDto = PopupTypeListResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
-            }
-        }else{
-            resultDto = PopupTypeListResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
-        }
-
+        PopupTypeListResponseDto resultDto = popupService.deletePopupTypeList(request);
         return resultDto;
     }
 
@@ -285,26 +240,7 @@ public class PopUpController {
     @ResponseBody
     @DeleteMapping("/popupConnectType/delete")
     public PopupConnectTypeListResponseDto popupConnectTypeDelete(HttpServletRequest request) {
-
-        PopupConnectTypeListResponseDto resultDto = PopupConnectTypeListResponseDto.builder().build();
-
-        String[] paramArr = request.getParameterValues("popupConnectTypeID");
-
-        if(paramArr != null && !paramArr[0].isEmpty()){
-            List<String> paramList = Arrays.asList(paramArr);
-            List<Integer> intParamList = new ArrayList<>();
-
-            //requestID를 int형으로 변환
-            try {
-                intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-                resultDto = popupService.deletePopupConnectTypeList(intParamList, resultDto);
-            }catch(Exception e) { // 문자열로 들어왔을 경우
-                resultDto = PopupConnectTypeListResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
-            }
-        }else {
-            resultDto = PopupConnectTypeListResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
-        }
-
+        PopupConnectTypeListResponseDto resultDto = popupService.deletePopupConnectTypeList(request);
         return resultDto;
     }
 
@@ -315,18 +251,7 @@ public class PopUpController {
     @ResponseBody
     @PostMapping("/image/save")
     public FileListResponseDto save(@RequestParam("multipartList") List<MultipartFile> multipartList, @RequestParam("path") String path, PopupDto dto) throws Exception {
-
-        FileListResponseDto resultDto = FileListResponseDto.builder().build();
-
-        // 최대 10개까지 이미지 업로드 가능
-        if(multipartList.size() > 0 && multipartList.size() < 11){
-            resultDto = fileService.createFile(multipartList, dto.getPopupID(), path);
-        }else if(multipartList.size() > 10) {
-            resultDto = FileListResponseDto.createErrorResponse(null, null, "파일은 10개까지 업로드 가능합니다.");
-        }else {
-            resultDto = FileListResponseDto.createErrorResponse(null, null, "잘못된 요청입니다.");
-        }
-
+        FileListResponseDto resultDto = popupService.createFile(multipartList, dto.getPopupID(), path);
         return resultDto;
     }
 
@@ -334,7 +259,4 @@ public class PopUpController {
     public String imageForm() {
         return "popup/popupImageWrite.admin";
     }
-    
-    
-    
 }

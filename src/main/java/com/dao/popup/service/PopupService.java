@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dao.popup.dto.PopupConnectTypeDto;
 import com.dao.popup.dto.PopupDto;
@@ -47,7 +48,7 @@ public interface PopupService {
 
     PopupTypeResponseDto updatePopupType(@Valid PopupTypeDto popupTypeDto, PopupTypeResponseDto resultDto);
 
-    PopupTypeListResponseDto deletePopupTypeList(List<Integer> intParamList, PopupTypeListResponseDto resultDto);
+    PopupTypeListResponseDto deletePopupTypeList(HttpServletRequest request);
 
     // 팝업 표시 기기 타입 CRUD
     List<PopupConnectTypeDto> selectPopupConnectTypeList();
@@ -56,5 +57,7 @@ public interface PopupService {
 
     PopupConnectTypeResponseDto updatePopupConnectType(@Valid PopupConnectTypeDto popupConnectTypeDto, PopupConnectTypeResponseDto resultDto);
 
-    PopupConnectTypeListResponseDto deletePopupConnectTypeList(List<Integer> intParamList, PopupConnectTypeListResponseDto resultDto);
+    PopupConnectTypeListResponseDto deletePopupConnectTypeList(HttpServletRequest request);
+
+    FileListResponseDto createFile(List<MultipartFile> multipartList, int popupID, String path) throws Exception;
 }

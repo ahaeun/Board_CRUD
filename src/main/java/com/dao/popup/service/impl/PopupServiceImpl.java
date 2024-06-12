@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dao.popup.dto.PageDto;
 import com.dao.popup.dto.PopupConnectTypeDto;
@@ -143,7 +144,6 @@ public class PopupServiceImpl implements PopupService{
 
     @Override
     public PopupListResponseDto deletePopupList(HttpServletRequest request) {
-
         PopupListResponseDto resultDto = PopupListResponseDto.builder().build();
         String[] paramArr = request.getParameterValues("popupID");
 
@@ -231,16 +231,31 @@ public class PopupServiceImpl implements PopupService{
     }
 
     @Override
-    public PopupTypeListResponseDto deletePopupTypeList(List<Integer> paramList, PopupTypeListResponseDto resultDto) {
-        int result = popupMapper.deletePopupType(paramList);
+    public PopupTypeListResponseDto deletePopupTypeList(HttpServletRequest request) {
+        PopupTypeListResponseDto resultDto = PopupTypeListResponseDto.builder().build();
+        String[] paramArr = request.getParameterValues("popupTypeID");
 
-        if(result > 0) { //성공
-            resultDto = PopupTypeListResponseDto.createSuccessResponse(paramList, BasicResponseData.SUCCESS.getMessage());
+        if(!paramArr[0].isEmpty()){
+            List<String> paramList = Arrays.asList(paramArr);
+            List<Integer> intParamList = new ArrayList<>();
 
-        }else {
-            resultDto = PopupTypeListResponseDto.createErrorResponse(paramList, BasicResponseData.FAIL.getMessage());
+            //requestID를 int형으로 변환
+            try {
+                intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+                int result = popupMapper.deletePopupType(intParamList);
+
+                if(result > 0) { //성공
+                    resultDto = PopupTypeListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage());
+                }else {
+                    resultDto = PopupTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getMessage());
+                }
+            }catch(Exception e) { // 문자열로 들어왔을 경우
+                resultDto = PopupTypeListResponseDto.createErrorResponse(intParamList, "잘못된 작업이 요청되었습니다.");
+            }
+            
+        }else{
+            resultDto = PopupTypeListResponseDto.createErrorResponse(null, "삭제할 팝업을 선택해주세요.");
         }
-
         return resultDto;
     }
 
@@ -264,8 +279,7 @@ public class PopupServiceImpl implements PopupService{
     }
 
     @Override
-    public PopupConnectTypeResponseDto updatePopupConnectType(@Valid PopupConnectTypeDto popupConnectTypeDto,
-            PopupConnectTypeResponseDto resultDto) {
+    public PopupConnectTypeResponseDto updatePopupConnectType(@Valid PopupConnectTypeDto popupConnectTypeDto, PopupConnectTypeResponseDto resultDto) {
                 int result = popupMapper.updatePopupConnectType(popupConnectTypeDto);
 
                 if(result == 1){
@@ -277,14 +291,45 @@ public class PopupServiceImpl implements PopupService{
     }
 
     @Override
-    public PopupConnectTypeListResponseDto deletePopupConnectTypeList(List<Integer> paramList, PopupConnectTypeListResponseDto resultDto) {
-        int result = popupMapper.deletePopupConnectType(paramList);
+    public PopupConnectTypeListResponseDto deletePopupConnectTypeList(HttpServletRequest request) {
+        PopupConnectTypeListResponseDto resultDto = PopupConnectTypeListResponseDto.builder().build();
+        String[] paramArr = request.getParameterValues("popupConnectTypeID");
 
-        if(result > 0) { //성공
-            resultDto = PopupConnectTypeListResponseDto.createSuccessResponse(paramList, BasicResponseData.SUCCESS.getMessage());
-        
+        if(!paramArr[0].isEmpty()){
+            List<String> paramList = Arrays.asList(paramArr);
+            List<Integer> intParamList = new ArrayList<>();
+
+            //requestID를 int형으로 변환
+            try {
+                intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+                int result = popupMapper.deletePopupConnectType(intParamList);
+
+                if(result > 0) { //성공
+                    resultDto = PopupConnectTypeListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage());
+                }else {
+                    resultDto = PopupConnectTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getMessage());
+                }
+            }catch(Exception e) { // 문자열로 들어왔을 경우
+                resultDto = PopupConnectTypeListResponseDto.createErrorResponse(intParamList, "잘못된 작업이 요청되었습니다.");
+            }
+            
+        }else{
+            resultDto = PopupConnectTypeListResponseDto.createErrorResponse(null, "삭제할 항목을 선택해주세요.");
+        }
+        return resultDto;
+    }
+
+    @Override
+    public FileListResponseDto createFile(List<MultipartFile> multipartList, int popupID, String path) throws Exception {
+        FileListResponseDto resultDto = FileListResponseDto.builder().build();
+
+        // 최대 10개까지 이미지 업로드 가능
+        if(multipartList.size() > 0 && multipartList.size() < 11){
+            resultDto = fileService.createFile(multipartList, popupID, path);
+        }else if(multipartList.size() > 10) {
+            resultDto = FileListResponseDto.createErrorResponse(null, null, "파일은 10개까지 업로드 가능합니다.");
         }else {
-            resultDto = PopupConnectTypeListResponseDto.createErrorResponse(paramList, BasicResponseData.FAIL.getMessage());
+            resultDto = FileListResponseDto.createErrorResponse(null, null, "잘못된 요청입니다.");
         }
         return resultDto;
     }
