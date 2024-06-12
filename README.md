@@ -15,6 +15,9 @@
 4. 팝업 수정 기능
 5. 팝업 삭제 기능
 
+* xss : security에 필터를 적용하여 스크립트를 허용하지 못하도록 block한다.
+* sql injection : mybatis에서 #{}를 사용하여 String으로 치환, 실행 하도록 한다.
+
 # 경로
 /dao/popup/controller - 팝업 컨드롤러<br/>
 /dao/popup/service - 팝업 service, serviceImpl 비지니스 로직<br/>
