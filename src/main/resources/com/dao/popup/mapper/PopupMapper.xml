@@ -20,7 +20,7 @@
         PopUpID, ConnectTypeID, AdminID, NoWatchTime, StartAt, EndAt, LeftPosition, TopPosition, Width, Height, PopUpTitle, PopUpContent
             FROM popup
                 WHERE IsDelete = 'N'
-                    ORDER BY PopUpID
+                    ORDER BY PopUpID DESC
                         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset};
     </select>
 
@@ -126,9 +126,9 @@
             </foreach>
     </update>
 
-    <!-- <select id="injectionTest" parameterType="String" resultType="com.dao.popup.dto.PopupDto">
-        select PopUpTitle from popup where PopUpID = #{injection};
-    </select> -->
+    <select id="injectionTest" parameterType="String" resultType="com.dao.popup.dto.PopupDto">
+        select PopUpTitle from popup where PopupTitle = #{injection} and PopUpID = 14;
+    </select>
 
     <!-- <select id="injectionTest" parameterType="String" resultType="com.dao.popup.dto.PopupDto">
         select PopUpTitle from popup where popupTitle = #{injection};
