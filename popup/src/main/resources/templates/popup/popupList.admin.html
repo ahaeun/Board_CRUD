@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org"></html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup List</title>
+</head>
+<body>
+    <table>
+        <th:block th:each="popup : ${popupPageList}">
+            <tr>
+                <td th:text="${popup.popupTitle}"></td>
+                <td th:text="${popup.popupContent}"></td>
+                <td th:text="${popup.createAt}"></td>
+            </tr>
+        </th:block>
+    </table>
+    <input type="text" th:value="${pageDto.listSize}">
+</body>
+</html>

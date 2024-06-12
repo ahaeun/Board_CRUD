@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "com.dao.popup.web.xss.use-xss.filter",
+  "type": "java.lang.String",
+  "description": "A description for 'com.dao.popup.web.xss.use-xss.filter'"
+}]}
