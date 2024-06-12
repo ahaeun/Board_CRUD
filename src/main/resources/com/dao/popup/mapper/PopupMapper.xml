@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.popup.mapper.PopupMapper">
+
+    
+    <select id="popupListCount" parameterType="com.dao.popup.dto.PopupDto" resultType="int">
+        SELECT COUNT(*) FROM popup WHERE IsDelete = 'N';
+    </select>
+
+    <select id = "selectPopup" parameterType="int" resultType="com.dao.popup.dto.PopupDto">
+        SELECT 
+        PopUpID, PopUpTypeID, ConnectTypeID, AdminID, NoWatchTime, StartAt, EndAt, LeftPosition, PopUpTitle, PopUpContent
+            FROM popup 
+                WHERE IsDelete = 'N' and PopUpID = #{popupNo};
+    </select>
+
+    <select id="selectPopupList" parameterType="com.dao.popup.dto.RequestListDto" resultType="com.dao.popup.dto.PopupDto">
+        SELECT 
+        PopUpID, ConnectTypeID, AdminID, NoWatchTime, StartAt, EndAt, LeftPosition, TopPosition, Width, Height, PopUpTitle, PopUpContent
+            FROM popup
+                WHERE IsDelete = 'N'
+                    ORDER BY PopUpID DESC
+                        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset};
+    </select>
+
+    <select id="selectPopupType" resultType="com.dao.popup.dto.PopupTypeDto">
+        SELECT PopUpTypeID, PopUpType 
+            FROM popupType
+                WHERE IsDelete = 'N';
+    </select>
+
+    <select id="selectPopupConnectType" resultType="com.dao.popup.dto.PopupConnectTypeDto">
+        SELECT PopUpConnectTypeID, PopUpConnectType 
+            FROM popupConnectType
+                WHERE IsDelete = 'N';
+    </select>
+
+    <select id="selectPopupTypeList" resultType="com.dao.popup.dto.PopupTypeDto">
+        SELECT PopUpTypeID, PopUpType 
+            FROM popupType 
+                WHERE IsDelete = 'N';
+    </select>
+
+    <select id="selectPopupConnectTypeList" resultType="com.dao.popup.dto.PopupConnectTypeDto">
+        SELECT PopUpConnectTypeID, PopUpConnectType
+            FROM popupConnectType
+                WHERE IsDelete = 'N';
+    </select>
+
+    <insert id="insertPopup" parameterType="com.dao.popup.dto.PopupDto" useGeneratedKeys="true" keyProperty="popupID">
+        INSERT INTO popup (PopUpTypeID, ConnectTypeID, AdminID, NoWatchTime, StartAt, EndAt, PopUpTitle, PopUpContent, LeftPosition, TopPosition, Width, Height)
+            VALUES (#{popupTypeID}, #{connectTypeID}, #{adminID}, #{noWatchTime}, #{startAt}, #{endAt}, #{popupTitle}, #{popupContent}, #{leftPosition}, #{topPosition}, #{width}, #{height});
+    </insert>
+
+    <insert id="insertPopupType" parameterType="com.dao.popup.dto.PopupTypeDto" useGeneratedKeys="true" keyProperty="popupTypeID">
+        INSERT INTO popuptype (PopUpType)
+            VALUES (#{popupType});
+    </insert>
+
+    <insert id="insertPopupConnectType" parameterType="com.dao.popup.dto.PopupConnectTypeDto" useGeneratedKeys="true" keyProperty="popupConnectTypeID">
+        INSERT INTO popupconnecttype (PopUpConnectType)
+            VALUES (#{popupConnectType});
+    </insert>
+
+    <insert id="insertPopupImage" parameterType="com.dao.popup.dto.FileDto" useGeneratedKeys="true" keyProperty="fileID">
+        INSERT INTO popupImage (PopUpID, FileOriginalName, FileEncryptName, FileSize, FileExtension, FileMimeType)
+            VALUES 
+            <foreach item="item" collection="list" open="(" separator="," close=")">
+                #{popupID}, #{item.fileOriginalName}, #{item.fileEncryptName}, #{item.fileSize}, #{item.fileExtension}, #{item.fileMimetype}
+            </foreach>
+    </insert>
+
+    <update id="updatePopup" parameterType="com.dao.popup.dto.PopupDto">
+        UPDATE popup SET 
+            PopUpTypeID = #{popupTypeID},
+            ConnectTypeID = #{connectTypeID},
+            NoWatchTime = #{noWatchTime},
+            StartAt = #{startAt},
+            EndAt = #{endAt},
+            PopUpTitle = #{popupTitle},
+            PopUpContent = #{popupContent},
+            LeftPosition = #{leftPosition},
+            TopPosition = #{topPosition},
+            Width = #{width},
+            Height = #{height}
+                WHERE PopUpID = #{popupID};
+    </update>
+
+    <update id="updatePopupType" parameterType="com.dao.popup.dto.PopupTypeDto">
+        UPDATE popuptype SET
+            PopUpType = #{popupType}
+                WHERE PopUpTypeID = #{popupTypeID}
+    </update>
+
+    <update id="updatePopupConnectType" parameterType="com.dao.popup.dto.PopupConnectTypeDto">
+        UPDATE popupconnecttype SET
+            PopUpConnectType = #{popupConnectType}
+                WHERE PopUpConnectTypeID = #{popupConnectTypeID}
+    </update>
+
+    <update id="deletePopup" parameterType="String">
+        UPDATE popup SET 
+            IsDelete = 'Y'
+            WHERE PopUpID IN
+            <foreach item="id" collection="paramList" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+    </update>
+
+    <update id="deletePopupType" parameterType="String">
+        UPDATE PopUpType SET 
+            IsDelete = 'Y'
+            WHERE PopUpTypeID IN
+            <foreach item="id" collection="paramList" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+    </update>
+
+    <update id="deletePopupConnectType" parameterType="String">
+        UPDATE PopUpConnectType SET 
+            IsDelete = 'Y'
+            WHERE PopUpConnectTypeID IN
+            <foreach item="id" collection="paramList" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+    </update>
+
+    <select id="injectionTest" parameterType="String" resultType="com.dao.popup.dto.PopupDto">
+        select PopUpTitle from popup where PopupTitle = #{injection} and PopUpID = 14;
+    </select>
+
+    <!-- <select id="injectionTest" parameterType="String" resultType="com.dao.popup.dto.PopupDto">
+        select PopUpTitle from popup where popupTitle = #{injection};
+    </select> -->
+
+</mapper>
