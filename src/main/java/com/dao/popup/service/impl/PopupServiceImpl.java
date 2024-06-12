@@ -322,6 +322,9 @@ public class PopupServiceImpl implements PopupService{
     @Override
     public FileListResponseDto createFile(List<MultipartFile> multipartList, int popupID, String path) throws Exception {
         FileListResponseDto resultDto = FileListResponseDto.builder().build();
+        if(path == null || path.equals("")) {
+            path = "popup";
+        }
 
         // 최대 10개까지 이미지 업로드 가능
         if(multipartList.size() > 0 && multipartList.size() < 11){
