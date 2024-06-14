@@ -104,7 +104,7 @@ public class PopUpController {
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
             resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().get(0).getDefaultMessage());
-        }else if(popupDto.getPopupID() == 0) { // 추가
+        }else if(popupDto.getPopupID() == null || popupDto.getPopupID() == 0) { // 추가
             resultDto = popupService.insertPopup(popupDto, resultDto, popupDto.getImageList());
         }else if(popupDto.getPopupID() > 0){ // popupDto
             resultDto = popupService.updatePopup(popupDto, resultDto, popupDto.getImageList());

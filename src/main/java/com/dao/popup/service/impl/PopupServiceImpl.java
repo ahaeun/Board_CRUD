@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -110,7 +111,8 @@ public class PopupServiceImpl implements PopupService{
     @Override
     public PopupResponseDto insertPopup(PopupDto popupDto, PopupResponseDto resultDto, FileListResponseDto fileListResponseDto) throws Exception {
 
-        popupMapper.insertPopup(popupDto);
+        try {
+            popupMapper.insertPopup(popupDto);
 
         if (popupDto.getPopupID() > 0) { // 팝업 등록 성공
             if(fileListResponseDto.getSuccessData().size() > 0){ // 첨부파일이 있을 경우
@@ -122,8 +124,12 @@ public class PopupServiceImpl implements PopupService{
         }else {
             resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
         }
-
         return resultDto;
+        }catch(DuplicateKeyException e) {
+            return PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.DUPLICATE_RESOURCE.getCode(), BasicResponseData.DUPLICATE_RESOURCE.getMessage());
+        }catch(DataIntegrityViolationException e) { // 잘못된 데이터가 바인딩 되었을 때 예외 처리
+            return PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
+        }
     }
 
     @Override
@@ -157,11 +163,8 @@ public class PopupServiceImpl implements PopupService{
                 intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
                 int result = popupMapper.deletePopup(intParamList);
 
-                if(result > 0) { //성공
-                    resultDto = PopupListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage());
-                }else {
-                    resultDto = PopupListResponseDto.createErrorResponse(intParamList,BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
-                }
+                resultDto = result > 0 ? PopupListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage())
+                                        : PopupListResponseDto.createErrorResponse(intParamList,BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
             }catch(Exception e) { // 문자열로 들어왔을 경우
                 resultDto = PopupListResponseDto.createErrorResponse(intParamList, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
             }
@@ -242,11 +245,9 @@ public class PopupServiceImpl implements PopupService{
                 intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
                 int result = popupMapper.deletePopupType(intParamList);
 
-                if(result > 0) { //성공
-                    resultDto = PopupTypeListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage());
-                }else {
-                    resultDto = PopupTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
-                }
+                resultDto = result > 0 ? PopupTypeListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage())
+                                        : PopupTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
+
             }catch(Exception e) { // 문자열로 들어왔을 경우
                 resultDto = PopupTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
             }
