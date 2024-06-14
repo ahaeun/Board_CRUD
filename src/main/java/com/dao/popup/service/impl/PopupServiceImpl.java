@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -53,7 +54,7 @@ public class PopupServiceImpl implements PopupService{
     FileMapper fileMapper;
 
 	@Override
-	public Map<String, Object> selectPopupList(String page, PopupDto popupDto) {
+	public Map<String, Object> selectPopupList(String page) {
 
         // page 예외 처리(음수, 문자열)
         int pageNumber;
@@ -65,10 +66,10 @@ public class PopupServiceImpl implements PopupService{
         }
         Pageable pageable =PageRequest.of(pageNumber, 5);
 		
-        int total = popupMapper.popupListCount(popupDto);
+        int total = popupMapper.popupListCount();
         Map<String, Object> popupMap = new HashMap<>();
         RequestListDto<?> requestList = RequestListDto.builder()
-            .data(popupDto)
+            .data(new PopupDto())
             .pageable(pageable)
             .build();
 
@@ -91,17 +92,17 @@ public class PopupServiceImpl implements PopupService{
     public PopupResponseDto selectPopup(String popupStringID) {
         try{
             int popupID = Integer.parseInt(popupStringID);
-
             PopupDto selectPopup = popupMapper.selectPopup(popupID);
-            if(selectPopup == null || selectPopup.getPopupID() == -1){ // 존재하지 않는 팝업일 경우
-                PopupResponseDto resultDto = PopupResponseDto.createErrorResponse(selectPopup, BasicResponseData.FAIL.getMessage());
+
+            if(selectPopup == null){ // 존재하지 않는 팝업일 경우
+                PopupResponseDto resultDto = PopupResponseDto.createErrorResponse(selectPopup, BasicResponseData.FAIL.getCode(), "존재하지 않는 팝업입니다.");
                 return resultDto;
             }else {
                 PopupResponseDto resultDto = PopupResponseDto.createSuccessResponse(selectPopup, BasicResponseData.SUCCESS.getMessage());
                 return resultDto;
             }
         }catch(Exception e) {
-            PopupResponseDto resultDto = PopupResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
+            PopupResponseDto resultDto = PopupResponseDto.createErrorResponse(null, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
             return resultDto;
         }
     }
@@ -119,7 +120,7 @@ public class PopupServiceImpl implements PopupService{
                 resultDto = PopupResponseDto.createSuccessResponse(popupDto, BasicResponseData.SUCCESS.getMessage());
             }
         }else {
-            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.FAIL.getMessage());
+            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
         }
 
         return resultDto;
@@ -137,7 +138,7 @@ public class PopupServiceImpl implements PopupService{
                 resultDto = PopupResponseDto.createSuccessResponse(popupDto, BasicResponseData.SUCCESS.getMessage());
             }
         }else {
-            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.FAIL.getMessage());
+            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
         }
         return resultDto;
     }
@@ -159,14 +160,14 @@ public class PopupServiceImpl implements PopupService{
                 if(result > 0) { //성공
                     resultDto = PopupListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage());
                 }else {
-                    resultDto = PopupListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getMessage());
+                    resultDto = PopupListResponseDto.createErrorResponse(intParamList,BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
                 }
             }catch(Exception e) { // 문자열로 들어왔을 경우
-                resultDto = PopupListResponseDto.createErrorResponse(intParamList, "잘못된 작업이 요청되었습니다.");
+                resultDto = PopupListResponseDto.createErrorResponse(intParamList, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
             }
             
         }else{
-            resultDto = PopupListResponseDto.createErrorResponse(null, "삭제할 팝업을 선택해주세요.");
+            resultDto = PopupListResponseDto.createErrorResponse(null, BasicResponseData.FAIL.getCode(), "삭제할 팝업을 선택해주세요.");
         }
         return resultDto;
     }
@@ -192,10 +193,10 @@ public class PopupServiceImpl implements PopupService{
             resultDto = PopupResponseDto.createSuccessResponse(popupDto, BasicResponseData.SUCCESS.getMessage());
             model.addAttribute("result", resultDto);
         }else if(popupDto == null) { // 존재하지 않는 게시판 일 경우 예외 처리
-            resultDto = PopupResponseDto.createErrorResponse(null, "존재하지 않는 게시판입니다.");
+            resultDto = PopupResponseDto.createErrorResponse(null, BasicResponseData.FAIL.getCode(), "존재하지 않는 게시판입니다.");
             model.addAttribute("result", resultDto);
         }else { // 폼 불러오기 실패 예외 처리
-            resultDto = PopupResponseDto.createErrorResponse(null, "잘못된 작업이 요청되었습니다.");
+            resultDto = PopupResponseDto.createErrorResponse(null, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
             model.addAttribute("result", resultDto);
         }
     }
@@ -207,27 +208,24 @@ public class PopupServiceImpl implements PopupService{
 
     @Override
     public PopupTypeResponseDto insertPopupType(@Valid PopupTypeDto popupTypeDto, PopupTypeResponseDto resultDto) {
-        popupMapper.insertPopupType(popupTypeDto);
-
-        if (popupTypeDto.getPopupTypeID() != 0) { // 팝업 등록 성공
-            resultDto = PopupTypeResponseDto.createSuccessResponse(popupTypeDto, BasicResponseData.SUCCESS.getMessage());
-        }else {
-            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.FAIL.getMessage());
+        try{
+            popupMapper.insertPopupType(popupTypeDto);
+            return popupTypeDto.getPopupTypeID() != 0 ? PopupTypeResponseDto.createSuccessResponse(popupTypeDto, BasicResponseData.SUCCESS.getMessage())
+                                                            : PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
+        }catch(DuplicateKeyException e) {
+            return PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.DUPLICATE_RESOURCE.getCode(), BasicResponseData.DUPLICATE_RESOURCE.getMessage());
         }
-
-        return resultDto;
     }
 
     @Override
     public PopupTypeResponseDto updatePopupType(@Valid PopupTypeDto popupTypeDto, PopupTypeResponseDto resultDto) {
-        int result = popupMapper.updatePopupType(popupTypeDto);
-
-        if(result == 1){
-            resultDto = PopupTypeResponseDto.createSuccessResponse(popupTypeDto, BasicResponseData.SUCCESS.getMessage());
-        }else {
-            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.FAIL.getMessage());
+        try{
+            int result = popupMapper.updatePopupType(popupTypeDto);
+            return result == 1 ? PopupTypeResponseDto.createSuccessResponse(popupTypeDto, BasicResponseData.SUCCESS.getMessage())
+                                                            : PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
+        }catch(Exception e) {
+            return PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
         }
-        return resultDto;
     }
 
     @Override
@@ -247,14 +245,14 @@ public class PopupServiceImpl implements PopupService{
                 if(result > 0) { //성공
                     resultDto = PopupTypeListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage());
                 }else {
-                    resultDto = PopupTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getMessage());
+                    resultDto = PopupTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
                 }
             }catch(Exception e) { // 문자열로 들어왔을 경우
-                resultDto = PopupTypeListResponseDto.createErrorResponse(intParamList, "잘못된 작업이 요청되었습니다.");
+                resultDto = PopupTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
             }
             
         }else{
-            resultDto = PopupTypeListResponseDto.createErrorResponse(null, "삭제할 팝업을 선택해주세요.");
+            resultDto = PopupTypeListResponseDto.createErrorResponse(null, BasicResponseData.FAIL.getCode(), "삭제할 팝업을 선택해주세요.");
         }
         return resultDto;
     }
@@ -267,27 +265,24 @@ public class PopupServiceImpl implements PopupService{
     @Override
     public PopupConnectTypeResponseDto insertPopupConnectType(@Valid PopupConnectTypeDto popupConnectTypeDto,
             PopupConnectTypeResponseDto resultDto) {
-                popupMapper.insertPopupConnectType(popupConnectTypeDto);
-
-                if (popupConnectTypeDto.getPopupConnectTypeID() != 0) { // 팝업 등록 성공
-                    resultDto = PopupConnectTypeResponseDto.createSuccessResponse(popupConnectTypeDto, BasicResponseData.SUCCESS.getMessage());
-                }else {
-                    resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.FAIL.getMessage());
+                try{
+                    popupMapper.insertPopupConnectType(popupConnectTypeDto);
+                    return popupConnectTypeDto.getPopupConnectTypeID() != 0 ? PopupConnectTypeResponseDto.createSuccessResponse(popupConnectTypeDto, BasicResponseData.SUCCESS.getMessage())
+                                                                        : PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
+                }catch(DuplicateKeyException e) { // index초과로 중복 키가 발생할 때 예외처리
+                    return PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.DUPLICATE_RESOURCE.getCode(), BasicResponseData.DUPLICATE_RESOURCE.getMessage());
                 }
-        
-                return resultDto;
     }
 
     @Override
     public PopupConnectTypeResponseDto updatePopupConnectType(@Valid PopupConnectTypeDto popupConnectTypeDto, PopupConnectTypeResponseDto resultDto) {
-                int result = popupMapper.updatePopupConnectType(popupConnectTypeDto);
-
-                if(result == 1){
-                    resultDto = PopupConnectTypeResponseDto.createSuccessResponse(popupConnectTypeDto, BasicResponseData.SUCCESS.getMessage());
-                }else {
-                    resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.FAIL.getMessage());
-                }
-                return resultDto;
+        try{
+            int result = popupMapper.updatePopupConnectType(popupConnectTypeDto);
+            return result == 1 ? PopupConnectTypeResponseDto.createSuccessResponse(popupConnectTypeDto, BasicResponseData.SUCCESS.getMessage())
+                            : PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
+        }catch(Exception e) {
+            return PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
+        }
     }
 
     @Override
@@ -304,35 +299,32 @@ public class PopupServiceImpl implements PopupService{
                 intParamList = paramList.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
                 int result = popupMapper.deletePopupConnectType(intParamList);
 
-                if(result > 0) { //성공
-                    resultDto = PopupConnectTypeListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage());
-                }else {
-                    resultDto = PopupConnectTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getMessage());
-                }
+                return result > 0 ? PopupConnectTypeListResponseDto.createSuccessResponse(intParamList, BasicResponseData.SUCCESS.getMessage())
+                    : PopupConnectTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.FAIL.getCode(), BasicResponseData.FAIL.getMessage());
             }catch(Exception e) { // 문자열로 들어왔을 경우
-                resultDto = PopupConnectTypeListResponseDto.createErrorResponse(intParamList, "잘못된 작업이 요청되었습니다.");
+                resultDto = PopupConnectTypeListResponseDto.createErrorResponse(intParamList, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
             }
             
         }else{
-            resultDto = PopupConnectTypeListResponseDto.createErrorResponse(null, "삭제할 항목을 선택해주세요.");
+            resultDto = PopupConnectTypeListResponseDto.createErrorResponse(null, BasicResponseData.FAIL.getCode(), "삭제할 항목을 선택해주세요.");
         }
         return resultDto;
     }
 
     @Override
-    public FileListResponseDto createFile(List<MultipartFile> multipartList, int popupID, String path) throws Exception {
+    public FileListResponseDto createFile(List<MultipartFile> multipartList, String path) throws Exception {
         FileListResponseDto resultDto = FileListResponseDto.builder().build();
-        if(path == null || path.equals("")) {
+        if(path == null || path.equals("")) { // 이미지 경로가 없거나 빈 칸으로 넘어왔을 경우 예외 처리
             path = "popup";
         }
 
         // 최대 10개까지 이미지 업로드 가능
         if(multipartList.size() > 0 && multipartList.size() < 11){
-            resultDto = fileService.createFile(multipartList, popupID, path);
+            resultDto = fileService.createFile(multipartList, path);
         }else if(multipartList.size() > 10) {
-            resultDto = FileListResponseDto.createErrorResponse(null, null, "파일은 10개까지 업로드 가능합니다.");
+            resultDto = FileListResponseDto.createErrorResponse(null, null, BasicResponseData.FAIL.getCode(), "파일은 10개까지 업로드 가능합니다.");
         }else {
-            resultDto = FileListResponseDto.createErrorResponse(null, null, "잘못된 요청입니다.");
+            resultDto = FileListResponseDto.createErrorResponse(null, null, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
         }
         return resultDto;
     }

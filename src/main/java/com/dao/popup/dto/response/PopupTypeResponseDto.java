@@ -14,10 +14,10 @@ import lombok.experimental.SuperBuilder;
 public class PopupTypeResponseDto extends CommonResponseDto {
     private PopupTypeDto data;
 
-    public static PopupTypeResponseDto createErrorResponse(PopupTypeDto popupTypeDto, String message) {
+    public static PopupTypeResponseDto createErrorResponse(PopupTypeDto popupTypeDto, String code, String message) {
         return PopupTypeResponseDto.builder()
                                     .data(popupTypeDto)
-                                    .code(BasicResponseData.FAIL.getCode())
+                                    .code(code)
                                     .message(message)
                                     .build();
     }

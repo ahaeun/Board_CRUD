@@ -1180,7 +1180,7 @@ public class KisaSeedCbc {
         System.arraycopy(cdata, 0, pbszPlainText, j, nRetOutLeng[0]);
         j += nRetOutLeng[0];
 
-        byte[] result = new byte[100];///////////////////////////////////////////////////////////////////////////////
+        byte[] result = new byte[100];
 
         if (SEED_CBC_Close(info, outbuf, (nRetOutLeng[0]), nPaddingLeng) == 1) {
             cdata = int32tochar_for_SEED_CBC(outbuf, remainleng - nPaddingLeng[0]);

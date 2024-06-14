@@ -20,11 +20,11 @@ public class FileListResponseDto extends CommonResponseDto {
     private List<FileDto> successData;
     private List<FileDto> failData;
 
-    public static FileListResponseDto createErrorResponse(List<FileDto> successDtoList, List<FileDto> failDtoList, String message) {
+    public static FileListResponseDto createErrorResponse(List<FileDto> successDtoList, List<FileDto> failDtoList, String code, String message) {
         return FileListResponseDto.builder()
                                     .successData(successDtoList)
                                     .failData(failDtoList)
-                                    .code(BasicResponseData.FAIL.getCode())
+                                    .code(code)
                                     .message(message)
                                     .build();
     }

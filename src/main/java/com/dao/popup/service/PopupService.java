@@ -24,7 +24,7 @@ import jakarta.validation.Valid;
 public interface PopupService {
 
     //팝업 게시판 CRUD
-    Map<String, Object> selectPopupList(String page, PopupDto popupDto);
+    Map<String, Object> selectPopupList(String page);
 
     PopupResponseDto insertPopup(PopupDto popupDto, PopupResponseDto resultDto, FileListResponseDto fileListResponseDto) throws Exception;
 
@@ -59,5 +59,9 @@ public interface PopupService {
 
     PopupConnectTypeListResponseDto deletePopupConnectTypeList(HttpServletRequest request);
 
-    FileListResponseDto createFile(List<MultipartFile> multipartList, int popupID, String path) throws Exception;
+    // 파일 저장
+    FileListResponseDto createFile(List<MultipartFile> multipartList, String path) throws Exception;
+
+    // 에러
+
 }

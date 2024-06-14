@@ -17,7 +17,7 @@ import jakarta.validation.Valid;
 public interface PopupMapper {
 
     //팝업 게시판 CRUD
-    int popupListCount(PopupDto popupDto);
+    int popupListCount();
 
     List<PopupDto> selectPopupList(RequestListDto<?> requestList);
 

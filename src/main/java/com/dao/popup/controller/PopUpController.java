@@ -27,6 +27,7 @@ import com.dao.popup.dto.response.PopupListResponseDto;
 import com.dao.popup.dto.response.PopupResponseDto;
 import com.dao.popup.dto.response.PopupTypeListResponseDto;
 import com.dao.popup.dto.response.PopupTypeResponseDto;
+import com.dao.popup.enums.BasicResponseData;
 import com.dao.popup.service.FileService;
 import com.dao.popup.service.PopupService;
 
@@ -45,13 +46,13 @@ public class PopUpController {
     /*
      *  @description : 팝업 목록
      *  
-     *  page로 현재 페이지의 번호를 가져와 Pageable 인터페이스를 사용하여
-     *  삭제 되지 않은 팝업 게시물만 페이징하여 가져오는 기능입니다.
+     *  경로 변수인 page를 사용하여 조회할 페이지의 번호를 받아 Pageable 인터페이스를 사용하여
+     *  삭제 되지 않은 팝업 게시물만 페이징해 가져오는 기능.
      */
     @GetMapping("/popupList/{page}")
-    public String postMethodName(@PathVariable("page") String page, PopupDto PopupDto, Model model) {
+    public String postMethodName(@PathVariable("page") String page, Model model) {
 
-        Map<String, Object> popupMap = popupService.selectPopupList(page, PopupDto);
+        Map<String, Object> popupMap = popupService.selectPopupList(page);
 
         model.addAttribute("popupPageList", popupMap.get("popupPageList"));
         model.addAttribute("pageDto", popupMap.get("pageDto"));
@@ -61,13 +62,12 @@ public class PopUpController {
 
     /*
      *  @description : 팝업 단건 조회
-     *  팝업 ID를 가져와 해당 팝업 게시판을 조회하는 폼으로 이동.
+     *  경로 변수인 팝업 ID를 가져와 해당 팝업 게시판을 조회하는 폼으로 이동.
      */
-    @GetMapping("/select/{popupID}")
-    public String popupSelect(Model model, @PathVariable("popupID") String popupStringID) {
+    @GetMapping("/select/{id}")
+    public String popupSelect(Model model, @PathVariable("id") String popupStringID) {
         PopupResponseDto resultDto = popupService.selectPopup(popupStringID);
         model.addAttribute("result", resultDto);
-
         return "popup/popupSelect.admin";
     }
 
@@ -103,13 +103,13 @@ public class PopUpController {
         PopupResponseDto resultDto = PopupResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            resultDto = PopupResponseDto.createErrorResponse(popupDto, errors.getAllErrors().toString());
+            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().get(0).getDefaultMessage());
         }else if(popupDto.getPopupID() == 0) { // 추가
             resultDto = popupService.insertPopup(popupDto, resultDto, popupDto.getImageList());
         }else if(popupDto.getPopupID() > 0){ // popupDto
             resultDto = popupService.updatePopup(popupDto, resultDto, popupDto.getImageList());
         }else {
-            resultDto = PopupResponseDto.createErrorResponse(popupDto, "잘못된 작업이 요청되었습니다.");
+            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
         }
         return resultDto;
     }
@@ -118,8 +118,9 @@ public class PopUpController {
      *  @description : 팝업 수정폼
      *  팝업 ID를 가져와 해당 팝업 게시판을 가져와 해당 수정 폼으로 이동하는 기능입니다.
      */
-    @GetMapping("/form/{popupID}")
-    public String popupForm(PopupDto popupDto, Model model, @PathVariable("popupID") String popupStringID) {
+    @GetMapping("/form/{id}")
+    public String popupForm(PopupDto popupDto, Model model, @PathVariable("id") String popupStringID) {
+
         PopupResponseDto resultDto = popupService.selectPopup(popupStringID);
         popupService.selectPopupForm(resultDto.getData(), model); // 조회 예외처리 및 result 값 세팅
 
@@ -128,13 +129,12 @@ public class PopUpController {
 
     /*
      *  @description : 팝업 삭제(다중 삭제 포함)
-     *  HttpServletRequest 안 단일 혹은 다중 popupID 값을 가져와 삭제(IsDelete='Y')시키는 기능입니다.
+     *  HttpServletRequest 단일 혹은 다중 popupID 값을 가져와 삭제(IsDelete='Y')시키는 기능입니다.
      */
     @ResponseBody
     @DeleteMapping("/delete")
     public PopupListResponseDto popupDelete(HttpServletRequest request) {
-        PopupListResponseDto resultDto = popupService.deletePopupList(request);
-        return resultDto;
+        return popupService.deletePopupList(request);
     }
 
     /*
@@ -162,13 +162,13 @@ public class PopUpController {
         PopupTypeResponseDto resultDto = PopupTypeResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, errors.getAllErrors().toString());
+            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().toString());
         }else if(popupTypeDto.getPopupTypeID() == 0) { // 추가
             resultDto = popupService.insertPopupType(popupTypeDto, resultDto);
         }else if(popupTypeDto.getPopupTypeID() > 0){ // popupDto
             resultDto = popupService.updatePopupType(popupTypeDto, resultDto);
         }else {
-            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, "잘못된 작업이 요청되었습니다.");
+            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
         }
         return resultDto;
 
@@ -190,7 +190,6 @@ public class PopUpController {
     @ResponseBody
     @DeleteMapping("/popupType/delete")
     public PopupTypeListResponseDto popupTypeDelete(HttpServletRequest request) {
-
         PopupTypeListResponseDto resultDto = popupService.deletePopupTypeList(request);
         return resultDto;
     }
@@ -221,13 +220,13 @@ public class PopUpController {
         PopupConnectTypeResponseDto resultDto = PopupConnectTypeResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, errors.getAllErrors().toString());
+            resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().toString());
         }else if(popupConnectTypeDto.getPopupConnectTypeID() == 0) { // 추가
             resultDto = popupService.insertPopupConnectType(popupConnectTypeDto, resultDto);
         }else if(popupConnectTypeDto.getPopupConnectTypeID() > 0){ // 수정
             resultDto = popupService.updatePopupConnectType(popupConnectTypeDto, resultDto);
         }else {
-            resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, "잘못된 작업이 요청되었습니다.");
+            resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
         }
         return resultDto;
 
@@ -250,8 +249,8 @@ public class PopUpController {
      */
     @ResponseBody
     @PostMapping("/image/save")
-    public FileListResponseDto save(@RequestParam("multipartList") List<MultipartFile> multipartList, @RequestParam("path") String path, PopupDto dto) throws Exception {
-        FileListResponseDto resultDto = popupService.createFile(multipartList, dto.getPopupID(), path);
+    public FileListResponseDto save(@RequestParam("multipartList") List<MultipartFile> multipartList, @RequestParam("path") String path) throws Exception {
+        FileListResponseDto resultDto = popupService.createFile(multipartList, path);
         return resultDto;
     }
 

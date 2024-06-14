@@ -34,7 +34,7 @@ public class FileServiceImpl implements FileService{
 
 
     @Override
-    public FileListResponseDto createFile(List<MultipartFile> multipartList, int id, String path) throws Exception {
+    public FileListResponseDto createFile(List<MultipartFile> multipartList, String path) throws Exception {
 
         seed.seedKey(Util.SEEDKEY);
 
@@ -97,7 +97,7 @@ public class FileServiceImpl implements FileService{
         if(multipartList.size() == successFileList.size()){
             resultDto = FileListResponseDto.createSuccessResponse(successFileList, BasicResponseData.SUCCESS.getMessage());
         }else {
-            resultDto = FileListResponseDto.createErrorResponse(successFileList, failFileList, "저장에 실패한 이미지가 있습니다.");
+            resultDto = FileListResponseDto.createErrorResponse(successFileList, failFileList, BasicResponseData.FAIL.getCode(), "저장에 실패한 이미지가 있습니다.");
         }
         
         
