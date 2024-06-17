@@ -1,5 +1,7 @@
 package com.dao.popup.dto.response;
 
+import java.util.List;
+
 import com.dao.popup.dto.PopupDto;
 import com.dao.popup.enums.BasicResponseData;
 
@@ -12,12 +14,14 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class PopupResponseDto extends CommonResponseDto{
     private PopupDto data;
+    private List<ValidResponseDto> failMessage;
 
-    public static PopupResponseDto createErrorResponse(PopupDto popupDto, String code, String message) {
+    public static PopupResponseDto createErrorResponse(PopupDto popupDto, String code, String message, List<ValidResponseDto> failMessage) {
         return PopupResponseDto.builder()
                                     .data(popupDto)
                                     .code(code)
-                                    .message(message)
+                                    .failMessage(failMessage)
+                                    .message(BasicResponseData.FAIL.getMessage())
                                     .build();
     }
 

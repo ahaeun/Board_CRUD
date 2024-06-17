@@ -21,15 +21,15 @@ import com.dao.popup.dto.PopupConnectTypeDto;
 import com.dao.popup.dto.PopupDto;
 import com.dao.popup.dto.PopupTypeDto;
 import com.dao.popup.dto.response.FileListResponseDto;
-import com.dao.popup.dto.response.PopupConnectTypeListResponseDto;
+import com.dao.popup.dto.response.DeleteListResponseDto;
 import com.dao.popup.dto.response.PopupConnectTypeResponseDto;
-import com.dao.popup.dto.response.PopupListResponseDto;
 import com.dao.popup.dto.response.PopupResponseDto;
-import com.dao.popup.dto.response.PopupTypeListResponseDto;
 import com.dao.popup.dto.response.PopupTypeResponseDto;
+import com.dao.popup.dto.response.ValidResponseDto;
 import com.dao.popup.enums.BasicResponseData;
 import com.dao.popup.service.FileService;
 import com.dao.popup.service.PopupService;
+import com.dao.popup.util.Util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -103,13 +103,14 @@ public class PopUpController {
         PopupResponseDto resultDto = PopupResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().get(0).getDefaultMessage());
+            List<ValidResponseDto> failList = Util.validFailList(errors);
+            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage(), failList);
         }else if(popupDto.getPopupID() == null || popupDto.getPopupID() == 0) { // 추가
             resultDto = popupService.insertPopup(popupDto, resultDto, popupDto.getImageList());
         }else if(popupDto.getPopupID() > 0){ // popupDto
             resultDto = popupService.updatePopup(popupDto, resultDto, popupDto.getImageList());
         }else {
-            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
+            resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage(), null);
         }
         return resultDto;
     }
@@ -133,7 +134,7 @@ public class PopUpController {
      */
     @ResponseBody
     @DeleteMapping("/delete")
-    public PopupListResponseDto popupDelete(HttpServletRequest request) {
+    public DeleteListResponseDto popupDelete(HttpServletRequest request) {
         return popupService.deletePopupList(request);
     }
 
@@ -162,13 +163,14 @@ public class PopUpController {
         PopupTypeResponseDto resultDto = PopupTypeResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().toString());
+            List<ValidResponseDto> failList = Util.validFailList(errors);
+            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage(), failList);
         }else if(popupTypeDto.getPopupTypeID() == 0) { // 추가
             resultDto = popupService.insertPopupType(popupTypeDto, resultDto);
         }else if(popupTypeDto.getPopupTypeID() > 0){ // popupDto
             resultDto = popupService.updatePopupType(popupTypeDto, resultDto);
         }else {
-            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
+            resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage(), null);
         }
         return resultDto;
 
@@ -189,8 +191,8 @@ public class PopUpController {
      */
     @ResponseBody
     @DeleteMapping("/popupType/delete")
-    public PopupTypeListResponseDto popupTypeDelete(HttpServletRequest request) {
-        PopupTypeListResponseDto resultDto = popupService.deletePopupTypeList(request);
+    public DeleteListResponseDto popupTypeDelete(HttpServletRequest request) {
+        DeleteListResponseDto resultDto = popupService.deletePopupTypeList(request);
         return resultDto;
     }
 
@@ -220,13 +222,14 @@ public class PopUpController {
         PopupConnectTypeResponseDto resultDto = PopupConnectTypeResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().toString());
+            List<ValidResponseDto> failList = Util.validFailList(errors);
+            resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().toString(), failList);
         }else if(popupConnectTypeDto.getPopupConnectTypeID() == 0) { // 추가
             resultDto = popupService.insertPopupConnectType(popupConnectTypeDto, resultDto);
         }else if(popupConnectTypeDto.getPopupConnectTypeID() > 0){ // 수정
             resultDto = popupService.updatePopupConnectType(popupConnectTypeDto, resultDto);
         }else {
-            resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage());
+            resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage(), null);
         }
         return resultDto;
 
@@ -238,8 +241,8 @@ public class PopUpController {
      */
     @ResponseBody
     @DeleteMapping("/popupConnectType/delete")
-    public PopupConnectTypeListResponseDto popupConnectTypeDelete(HttpServletRequest request) {
-        PopupConnectTypeListResponseDto resultDto = popupService.deletePopupConnectTypeList(request);
+    public DeleteListResponseDto popupConnectTypeDelete(HttpServletRequest request) {
+        DeleteListResponseDto resultDto = popupService.deletePopupConnectTypeList(request);
         return resultDto;
     }
 

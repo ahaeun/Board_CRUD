@@ -1,5 +1,7 @@
 package com.dao.popup.dto.response;
 
+import java.util.List;
+
 import com.dao.popup.dto.PopupConnectTypeDto;
 import com.dao.popup.enums.BasicResponseData;
 
@@ -12,12 +14,14 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class PopupConnectTypeResponseDto extends CommonResponseDto {
     private PopupConnectTypeDto data;
+    private List<ValidResponseDto> failMessage;
 
-    public static PopupConnectTypeResponseDto createErrorResponse(PopupConnectTypeDto popupConnectTypeDto, String code, String message) {
+    public static PopupConnectTypeResponseDto createErrorResponse(PopupConnectTypeDto popupConnectTypeDto, String code, String message, List<ValidResponseDto> failMessage) {
         return PopupConnectTypeResponseDto.builder()
                                     .data(popupConnectTypeDto)
                                     .code(code)
                                     .message(message)
+                                    .failMessage(failMessage)
                                     .build();
     }
 

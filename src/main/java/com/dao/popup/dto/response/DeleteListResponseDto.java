@@ -11,19 +11,19 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @SuperBuilder
-public class PopupConnectTypeListResponseDto extends CommonResponseDto {
+public class DeleteListResponseDto extends CommonResponseDto {
     private List<Integer> data;
 
-    public static PopupConnectTypeListResponseDto createErrorResponse(List<Integer> paramList, String code, String message) {
-        return PopupConnectTypeListResponseDto.builder()
+    public static DeleteListResponseDto createErrorResponse(List<Integer> paramList, String code, String message) {
+        return DeleteListResponseDto.builder()
                                             .data(paramList)
                                             .code(code)
                                             .message(message)
                                             .build();
     }
 
-    public static PopupConnectTypeListResponseDto createSuccessResponse(List<Integer> paramList, String message) {
-        return PopupConnectTypeListResponseDto.builder()
+    public static DeleteListResponseDto createSuccessResponse(List<Integer> paramList, String message) {
+        return DeleteListResponseDto.builder()
                                             .data(paramList)
                                             .code(BasicResponseData.SUCCESS.getCode())
                                             .message(message)

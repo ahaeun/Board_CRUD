@@ -11,11 +11,9 @@ import com.dao.popup.dto.PopupConnectTypeDto;
 import com.dao.popup.dto.PopupDto;
 import com.dao.popup.dto.PopupTypeDto;
 import com.dao.popup.dto.response.FileListResponseDto;
-import com.dao.popup.dto.response.PopupConnectTypeListResponseDto;
+import com.dao.popup.dto.response.DeleteListResponseDto;
 import com.dao.popup.dto.response.PopupConnectTypeResponseDto;
-import com.dao.popup.dto.response.PopupListResponseDto;
 import com.dao.popup.dto.response.PopupResponseDto;
-import com.dao.popup.dto.response.PopupTypeListResponseDto;
 import com.dao.popup.dto.response.PopupTypeResponseDto;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +28,7 @@ public interface PopupService {
 
     PopupResponseDto updatePopup(PopupDto popupDto, PopupResponseDto resultDto, FileListResponseDto fileListResponseDto);
 
-    PopupListResponseDto deletePopupList(HttpServletRequest request);
+    DeleteListResponseDto deletePopupList(HttpServletRequest request);
 
     PopupResponseDto selectPopup(String popupStringID);
 
@@ -48,7 +46,7 @@ public interface PopupService {
 
     PopupTypeResponseDto updatePopupType(@Valid PopupTypeDto popupTypeDto, PopupTypeResponseDto resultDto);
 
-    PopupTypeListResponseDto deletePopupTypeList(HttpServletRequest request);
+    DeleteListResponseDto deletePopupTypeList(HttpServletRequest request);
 
     // 팝업 표시 기기 타입 CRUD
     List<PopupConnectTypeDto> selectPopupConnectTypeList();
@@ -57,7 +55,7 @@ public interface PopupService {
 
     PopupConnectTypeResponseDto updatePopupConnectType(@Valid PopupConnectTypeDto popupConnectTypeDto, PopupConnectTypeResponseDto resultDto);
 
-    PopupConnectTypeListResponseDto deletePopupConnectTypeList(HttpServletRequest request);
+    DeleteListResponseDto deletePopupConnectTypeList(HttpServletRequest request);
 
     // 파일 저장
     FileListResponseDto createFile(List<MultipartFile> multipartList, String path) throws Exception;
