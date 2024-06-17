@@ -43,6 +43,9 @@ public class PopUpController {
     @Autowired
     FileService fileService;
 
+    @Autowired
+    Util util;
+
     /*
      *  @description : 팝업 목록
      *  
@@ -103,7 +106,7 @@ public class PopUpController {
         PopupResponseDto resultDto = PopupResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            List<ValidResponseDto> failList = Util.validFailList(errors);
+            List<ValidResponseDto> failList = util.validFailList(errors);
             resultDto = PopupResponseDto.createErrorResponse(popupDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage(), failList);
         }else if(popupDto.getPopupID() == null || popupDto.getPopupID() == 0) { // 추가
             resultDto = popupService.insertPopup(popupDto, resultDto, popupDto.getImageList());
@@ -163,7 +166,7 @@ public class PopUpController {
         PopupTypeResponseDto resultDto = PopupTypeResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            List<ValidResponseDto> failList = Util.validFailList(errors);
+            List<ValidResponseDto> failList = util.validFailList(errors);
             resultDto = PopupTypeResponseDto.createErrorResponse(popupTypeDto, BasicResponseData.BAD_REQUEST.getCode(), BasicResponseData.BAD_REQUEST.getMessage(), failList);
         }else if(popupTypeDto.getPopupTypeID() == 0) { // 추가
             resultDto = popupService.insertPopupType(popupTypeDto, resultDto);
@@ -222,7 +225,7 @@ public class PopUpController {
         PopupConnectTypeResponseDto resultDto = PopupConnectTypeResponseDto.builder().build();
 
         if(errors.hasErrors()){ // NotBlank 예외 처리
-            List<ValidResponseDto> failList = Util.validFailList(errors);
+            List<ValidResponseDto> failList = util.validFailList(errors);
             resultDto = PopupConnectTypeResponseDto.createErrorResponse(popupConnectTypeDto, BasicResponseData.BAD_REQUEST.getCode(), errors.getAllErrors().toString(), failList);
         }else if(popupConnectTypeDto.getPopupConnectTypeID() == 0) { // 추가
             resultDto = popupService.insertPopupConnectType(popupConnectTypeDto, resultDto);

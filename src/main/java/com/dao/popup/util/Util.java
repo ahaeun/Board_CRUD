@@ -33,7 +33,7 @@ public class Util {
     public static final List<String> IMAGE_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png");
 
     // 유효성 체크에서 걸린 실패 필드 리스트에 담기
-    public static List<ValidResponseDto> validFailList(Errors errors) {
+    public List<ValidResponseDto> validFailList(Errors errors) {
       if(errors.hasErrors()){ // NotBlank 예외 처리
             List<ValidResponseDto> failList = new ArrayList<>();
             for(FieldError e : errors.getFieldErrors()) {
